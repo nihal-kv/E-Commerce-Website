@@ -1,23 +1,64 @@
-import logo from './logo.svg';
+
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
+import Home from './pages/Home';
+import Login from './pages/Login';
+
+import { useContext, useEffect } from 'react';
+import { AppContext } from './context/AppContext';
+import Signup from './pages/Signup';
+import { toast } from 'react-hot-toast';
+
 
 function App() {
+
+  const {setShoppingItems, setIsLoading}=useContext(AppContext);
+  
+
+  async function fetchItems(){
+    setIsLoading(true);
+    try{
+      const response=await fetch('https://e-commerce-website-e8fce-default-rtdb.firebaseio.com/items.json');
+      const data=await response.json();
+
+      const loadedItems=[];
+
+      for(const key in data)
+      {
+        loadedItems.push({
+          id: key,
+          title:data[key].title,
+          price: data[key].price,
+          imageUrl: data[key].imageUrl
+        })
+      }
+      setShoppingItems(loadedItems);
+
+
+    }
+    catch(err)
+    {
+      toast.error(err);
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(()=>{
+    fetchItems();
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+        
+        
+
+        <Routes>
+          <Route path='/' element={<Home/>} />
+          <Route path='/login' element={<Login/>} />
+          <Route path='/signup' element={<Signup/>}/>
+          {/* <Route path='/checkout' element={<Checkout/>} /> */}
+
+        </Routes>
     </div>
   );
 }
